@@ -6,24 +6,21 @@
 <title>Calculator</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#0f0f0f;display:flex;justify-content:center;align-items:center;min-height:100vh;font-family:'Segoe UI',sans-serif}
-.calculator{background:#1a1a1a;border-radius:20px;padding:20px;width:320px;box-shadow:0 0 40px rgba(240,165,0,0.2);border:1px solid #2a2a2a}
-.display{background:#0f0f0f;border-radius:12px;padding:20px;margin-bottom:15px;text-align:right;border:1px solid #2a2a2a}
-.expression{color:#888;font-size:0.85rem;min-height:20px;margin-bottom:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.result{color:#fff;font-size:2rem;font-weight:700;min-height:45px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.buttons{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-button{padding:18px;border:none;border-radius:12px;font-size:1.1rem;font-weight:600;cursor:pointer;transition:all 0.2s;letter-spacing:0.5px}
-button:active{transform:scale(0.95)}
-.btn-clear{background:#e53935;color:#fff;grid-column:span 2}
-.btn-clear:hover{background:#c62828}
-.btn-operator{background:#2a2a2a;color:#f0a500;border:1px solid #f0a500}
-.btn-operator:hover{background:#f0a500;color:#000}
-.btn-number{background:#2a2a2a;color:#fff}
-.btn-number:hover{background:#3a3a3a}
-.btn-equals{background:#f0a500;color:#000;grid-column:span 2}
-.btn-equals:hover{background:#ffd54f}
-.btn-special{background:#2a2a2a;color:#f0a500}
-.btn-special:hover{background:#3a3a3a}
+body{background:#000;display:flex;justify-content:center;align-items:center;min-height:100vh;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+.calculator{width:100%;max-width:380px;padding:20px}
+.display{padding:20px 10px;text-align:right;margin-bottom:10px}
+.expression{color:#888;font-size:1rem;min-height:24px;margin-bottom:8px}
+.result{color:#fff;font-size:4rem;font-weight:300;line-height:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.buttons{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+button{height:80px;border:none;border-radius:50%;font-size:1.5rem;font-weight:400;cursor:pointer;transition:opacity 0.1s}
+button:active{opacity:0.7}
+.btn-clear{background:#a5a5a5;color:#000}
+.btn-special{background:#a5a5a5;color:#000}
+.btn-operator{background:#f0a500;color:#fff}
+.btn-operator.active{background:#fff;color:#f0a500}
+.btn-number{background:#333;color:#fff}
+.btn-zero{border-radius:40px;text-align:left;padding-left:28px}
+.btn-equals{background:#f0a500;color:#fff}
 </style>
 </head>
 <body>
@@ -33,85 +30,134 @@ button:active{transform:scale(0.95)}
     <div class="result" id="result">0</div>
   </div>
   <div class="buttons">
-    <button class="btn-clear" onclick="clearAll()">AC</button>
-    <button class="btn-special" onclick="deleteLast()">⌫</button>
-    <button class="btn-operator" onclick="appendVal('%')">%</button>
-    <button class="btn-number" onclick="appendVal('7')">7</button>
-    <button class="btn-number" onclick="appendVal('8')">8</button>
-    <button class="btn-number" onclick="appendVal('9')">9</button>
-    <button class="btn-operator" onclick="appendVal('/')">÷</button>
-    <button class="btn-number" onclick="appendVal('4')">4</button>
-    <button class="btn-number" onclick="appendVal('5')">5</button>
-    <button class="btn-number" onclick="appendVal('6')">6</button>
-    <button class="btn-operator" onclick="appendVal('*')">×</button>
-    <button class="btn-number" onclick="appendVal('1')">1</button>
-    <button class="btn-number" onclick="appendVal('2')">2</button>
-    <button class="btn-number" onclick="appendVal('3')">3</button>
-    <button class="btn-operator" onclick="appendVal('-')">−</button>
-    <button class="btn-number" onclick="appendVal('0')">0</button>
-    <button class="btn-number" onclick="appendVal('.')">.</button>
+    <button class="btn-clear" id="acBtn" onclick="clearAll()">AC</button>
     <button class="btn-special" onclick="toggleSign()">+/−</button>
-    <button class="btn-operator" onclick="appendVal('+')">+</button>
+    <button class="btn-special" onclick="percentage()">%</button>
+    <button class="btn-operator" id="op-div" onclick="setOperator('/')">÷</button>
+
+    <button class="btn-number" onclick="appendNum('7')">7</button>
+    <button class="btn-number" onclick="appendNum('8')">8</button>
+    <button class="btn-number" onclick="appendNum('9')">9</button>
+    <button class="btn-operator" id="op-mul" onclick="setOperator('*')">×</button>
+
+    <button class="btn-number" onclick="appendNum('4')">4</button>
+    <button class="btn-number" onclick="appendNum('5')">5</button>
+    <button class="btn-number" onclick="appendNum('6')">6</button>
+    <button class="btn-operator" id="op-sub" onclick="setOperator('-')">−</button>
+
+    <button class="btn-number" onclick="appendNum('1')">1</button>
+    <button class="btn-number" onclick="appendNum('2')">2</button>
+    <button class="btn-number" onclick="appendNum('3')">3</button>
+    <button class="btn-operator" id="op-add" onclick="setOperator('+')">+</button>
+
+    <button class="btn-number btn-zero" onclick="appendNum('0')">0</button>
+    <button class="btn-number" onclick="appendDot()">.</button>
     <button class="btn-equals" onclick="calculate()">=</button>
   </div>
 </div>
 <script>
-let current='';
-let expression='';
+let current='0';
+let previous='';
+let operator=null;
+let shouldReset=false;
 
-function appendVal(val){
-if(['+','-','*','/','%'].includes(val)){
-if(current===''&&expression==='')return;
-expression+=current+val;
-document.getElementById('expression').textContent=expression.replace(/\*/g,'×').replace(/\//g,'÷');
-current='';
-}else{
-if(val==='.'&&current.includes('.'))return;
-current+=val;
+function updateDisplay(){
+document.getElementById('result').textContent=formatNum(current);
+document.getElementById('acBtn').textContent=current==='0'?'AC':'C';
 }
-document.getElementById('result').textContent=current||'0';
+
+function formatNum(num){
+const n=parseFloat(num);
+if(isNaN(n))return num;
+if(Math.abs(n)>=1e9)return n.toExponential(3);
+return n.toLocaleString('en',{maximumFractionDigits:9}).replace(/,/g,'');
+}
+
+function appendNum(num){
+if(shouldReset){current='0';shouldReset=false}
+if(current==='0'&&num!=='.')current=num;
+else current+=num;
+updateDisplay();
+}
+
+function appendDot(){
+if(shouldReset){current='0';shouldReset=false}
+if(!current.includes('.'))current+='.';
+updateDisplay();
 }
 
 function clearAll(){
-current='';expression='';
-document.getElementById('result').textContent='0';
+current='0';previous='';operator=null;shouldReset=false;
 document.getElementById('expression').textContent='';
-}
-
-function deleteLast(){
-current=current.slice(0,-1);
-document.getElementById('result').textContent=current||'0';
+clearActiveOp();
+updateDisplay();
 }
 
 function toggleSign(){
-if(current==='')return;
+if(current==='0')return;
 current=current.startsWith('-')?current.slice(1):'-'+current;
-document.getElementById('result').textContent=current;
+updateDisplay();
 }
 
-function calculate(){
-try{
-const full=expression+current;
-if(!full)return;
-const result=Function('"use strict";return ('+full+')')();
-document.getElementById('expression').textContent=full.replace(/\*/g,'×').replace(/\//g,'÷')+'=';
-document.getElementById('result').textContent=parseFloat(result.toFixed(10));
-current=String(result);
-expression='';
-}catch(e){
-document.getElementById('result').textContent='Error';
-current='';expression='';
+function percentage(){
+current=String(parseFloat(current)/100);
+updateDisplay();
 }
+
+function setOperator(op){
+if(operator&&!shouldReset)calculate(true);
+previous=current;
+operator=op;
+shouldReset=true;
+const opMap={'/':`${formatNum(previous)} ÷`,'*':`${formatNum(previous)} ×`,'-':`${formatNum(previous)} −`,'+':`${formatNum(previous)} +`};
+document.getElementById('expression').textContent=opMap[op]||'';
+clearActiveOp();
+const opIds={'div':'/','mul':'*','sub':'-','add':'+'};
+for(const[id,val]of Object.entries(opIds)){
+if(val===op)document.getElementById(`op-${id}`).classList.add('active');
+}
+}
+
+function clearActiveOp(){
+['div','mul','sub','add'].forEach(id=>document.getElementById(`op-${id}`).classList.remove('active'));
+}
+
+function calculate(intermediate=false){
+if(!operator||!previous)return;
+const a=parseFloat(previous);
+const b=parseFloat(current);
+let result;
+switch(operator){
+case '+':result=a+b;break;
+case '-':result=a-b;break;
+case '*':result=a*b;break;
+case '/':result=b===0?'Error':a/b;break;
+}
+if(!intermediate){
+const opSymbols={'/':`÷`,'*':`×`,'-':`−`,'+': `+`};
+document.getElementById('expression').textContent=`${formatNum(previous)} ${opSymbols[operator]} ${formatNum(current)} =`;
+operator=null;
+clearActiveOp();
+}
+current=result==='Error'?'Error':String(parseFloat(result.toFixed(10)));
+previous='';
+shouldReset=true;
+updateDisplay();
 }
 
 document.addEventListener('keydown',e=>{
-if(e.key>='0'&&e.key<='9')appendVal(e.key);
-else if(e.key==='.')appendVal('.');
-else if(e.key==='+'||e.key==='-'||e.key==='*'||e.key==='/')appendVal(e.key);
+if(e.key>='0'&&e.key<='9')appendNum(e.key);
+else if(e.key==='.')appendDot();
+else if(e.key==='+')setOperator('+');
+else if(e.key==='-')setOperator('-');
+else if(e.key==='*')setOperator('*');
+else if(e.key==='/')setOperator('/');
 else if(e.key==='Enter'||e.key==='=')calculate();
-else if(e.key==='Backspace')deleteLast();
+else if(e.key==='Backspace'){current=current.length>1?current.slice(0,-1):'0';updateDisplay();}
 else if(e.key==='Escape')clearAll();
 });
+
+updateDisplay();
 </script>
 </body>
 </html>
