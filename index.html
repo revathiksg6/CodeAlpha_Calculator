@@ -6,27 +6,23 @@
 <title>Calculator</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#1a1a2e;display:flex;justify-content:center;align-items:center;min-height:100vh;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;overflow:hidden}
-.calculator{width:100%;max-width:400px;padding:15px;height:100vh;display:flex;flex-direction:column;justify-content:flex-end}
-.display{padding:15px 10px;text-align:right;margin-bottom:10px;min-height:120px;display:flex;flex-direction:column;justify-content:flex-end}
-.expression{color:#7c83a0;font-size:0.95rem;min-height:22px;margin-bottom:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.result{color:#e8eaf6;font-size:3.5rem;font-weight:300;line-height:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.scientific-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:8px}
-.buttons{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-button{height:68px;border:none;border-radius:20px;font-size:1.2rem;font-weight:400;cursor:pointer;transition:all 0.15s;letter-spacing:0.3px}
-button:active{transform:scale(0.93);opacity:0.85}
-.btn-sci{background:#16213e;color:#a0a8c8;font-size:0.95rem}
-.btn-sci:hover{background:#1f2d4a}
-.btn-clear{background:#3d2b6b;color:#c084fc}
-.btn-special{background:#16213e;color:#a0a8c8}
-.btn-operator{background:#16213e;color:#818cf8}
-.btn-operator:hover{background:#1e2a5e}
-.btn-number{background:#0f3460;color:#e8eaf6}
-.btn-number:hover{background:#164080}
-.btn-zero{border-radius:20px}
-.btn-equals{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font-size:1.4rem}
-.btn-equals:hover{background:linear-gradient(135deg,#7c3aed,#6366f1)}
-.btn-backspace{background:#16213e;color:#f472b6;font-size:1rem}
+html,body{height:100%;overflow:hidden}
+body{background:#0d0d0d;display:flex;justify-content:center;align-items:center;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+.calculator{width:100vw;height:100vh;max-width:420px;display:flex;flex-direction:column;padding:10px 12px;gap:6px}
+.display{flex:1;display:flex;flex-direction:column;justify-content:flex-end;padding:10px 8px;min-height:0}
+.expression{color:#6b6b6b;font-size:0.85rem;text-align:right;min-height:20px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:4px}
+.result{color:#fff;font-size:3rem;font-weight:300;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.1}
+.sci-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.main-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+button{height:62px;border:none;border-radius:16px;font-size:1.1rem;font-weight:500;cursor:pointer;transition:transform 0.1s,opacity 0.1s}
+button:active{transform:scale(0.92);opacity:0.75}
+.btn-sci{background:#1c1c1c;color:#c084fc;font-size:0.9rem}
+.btn-clear{background:#2d1f2e;color:#f472b6;font-weight:600}
+.btn-special{background:#1c1c1c;color:#e879f9}
+.btn-operator{background:#1c1c1c;color:#f9a8d4}
+.btn-number{background:#1a1a1a;color:#f1f5f9}
+.btn-backspace{background:#1c1c1c;color:#f472b6}
+.btn-equals{background:linear-gradient(135deg,#f472b6,#ec4899);color:#fff;font-size:1.3rem;font-weight:600;box-shadow:0 4px 15px rgba(244,114,182,0.4)}
 </style>
 </head>
 <body>
@@ -35,9 +31,7 @@ button:active{transform:scale(0.93);opacity:0.85}
     <div class="expression" id="expression"></div>
     <div class="result" id="result">0</div>
   </div>
-
-  <!-- Scientific Row -->
-  <div class="scientific-row">
+  <div class="sci-grid">
     <button class="btn-sci" onclick="appendSci('Math.sqrt(')">√</button>
     <button class="btn-sci" onclick="appendVal('Math.PI')">π</button>
     <button class="btn-sci" onclick="appendVal('^')">^</button>
@@ -51,30 +45,24 @@ button:active{transform:scale(0.93);opacity:0.85}
     <button class="btn-sci" onclick="appendVal('(')">(</button>
     <button class="btn-sci" onclick="appendVal(')')">)</button>
   </div>
-
-  <!-- Main Buttons -->
-  <div class="buttons">
+  <div class="main-grid">
     <button class="btn-clear" id="acBtn" onclick="clearAll()">AC</button>
     <button class="btn-special" onclick="toggleSign()">+/−</button>
     <button class="btn-special" onclick="percentage()">%</button>
     <button class="btn-operator" onclick="appendOp('/')">÷</button>
-
     <button class="btn-number" onclick="appendNum('7')">7</button>
     <button class="btn-number" onclick="appendNum('8')">8</button>
     <button class="btn-number" onclick="appendNum('9')">9</button>
     <button class="btn-operator" onclick="appendOp('*')">×</button>
-
     <button class="btn-number" onclick="appendNum('4')">4</button>
     <button class="btn-number" onclick="appendNum('5')">5</button>
     <button class="btn-number" onclick="appendNum('6')">6</button>
     <button class="btn-operator" onclick="appendOp('-')">−</button>
-
     <button class="btn-number" onclick="appendNum('1')">1</button>
     <button class="btn-number" onclick="appendNum('2')">2</button>
     <button class="btn-number" onclick="appendNum('3')">3</button>
     <button class="btn-operator" onclick="appendOp('+')">+</button>
-
-    <button class="btn-number btn-zero" onclick="appendNum('0')">0</button>
+    <button class="btn-number" onclick="appendNum('0')">0</button>
     <button class="btn-number" onclick="appendDot()">.</button>
     <button class="btn-backspace" onclick="deleteLast()">⌫</button>
     <button class="btn-equals" onclick="calculate()">=</button>
@@ -86,7 +74,7 @@ let justCalc=false;
 
 function updateDisplay(val){
 document.getElementById('result').textContent=val||'0';
-document.getElementById('acBtn').textContent=(expr===''||expr==='0')?'AC':'C';
+document.getElementById('acBtn').textContent=(expr==='')?'AC':'C';
 }
 
 function appendNum(n){
@@ -158,7 +146,7 @@ updateDisplay(expr);
 
 function factorial(n){
 n=Math.floor(n);
-if(n<0)return NaN;
+if(n<0||n>170)return NaN;
 if(n===0||n===1)return 1;
 let r=1;
 for(let i=2;i<=n;i++)r*=i;
@@ -168,8 +156,9 @@ return r;
 function calculate(){
 if(!expr)return;
 try{
-document.getElementById('expression').textContent=expr.replace(/\*\*/g,'^').replace(/Math\.sqrt/g,'√').replace(/Math\.sin/g,'sin').replace(/Math\.cos/g,'cos').replace(/Math\.tan/g,'tan').replace(/Math\.log10/g,'log').replace(/Math\.log/g,'ln').replace(/Math\.PI/g,'π').replace(/Math\.E/g,'e')+'=';
-const result=eval(expr);
+const dispExpr=expr.replace(/\*\*/g,'^').replace(/Math\.sqrt/g,'√').replace(/Math\.sin/g,'sin').replace(/Math\.cos/g,'cos').replace(/Math\.tan/g,'tan').replace(/Math\.log10/g,'log').replace(/Math\.log/g,'ln').replace(/Math\.PI/g,'π').replace(/Math\.E/g,'e');
+document.getElementById('expression').textContent=dispExpr+'=';
+const result=Function('"use strict";const factorial='+factorial.toString()+';return ('+expr+')')();
 const formatted=parseFloat(result.toFixed(10));
 expr=String(formatted);
 updateDisplay(formatted);
