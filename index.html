@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Calculator</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0f0f0f;display:flex;justify-content:center;align-items:center;min-height:100vh;font-family:'Segoe UI',sans-serif}
+.calculator{background:#1a1a1a;border-radius:20px;padding:20px;width:320px;box-shadow:0 0 40px rgba(240,165,0,0.2);border:1px solid #2a2a2a}
+.display{background:#0f0f0f;border-radius:12px;padding:20px;margin-bottom:15px;text-align:right;border:1px solid #2a2a2a}
+.expression{color:#888;font-size:0.85rem;min-height:20px;margin-bottom:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.result{color:#fff;font-size:2rem;font-weight:700;min-height:45px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.buttons{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+button{padding:18px;border:none;border-radius:12px;font-size:1.1rem;font-weight:600;cursor:pointer;transition:all 0.2s;letter-spacing:0.5px}
+button:active{transform:scale(0.95)}
+.btn-clear{background:#e53935;color:#fff;grid-column:span 2}
+.btn-clear:hover{background:#c62828}
+.btn-operator{background:#2a2a2a;color:#f0a500;border:1px solid #f0a500}
+.btn-operator:hover{background:#f0a500;color:#000}
+.btn-number{background:#2a2a2a;color:#fff}
+.btn-number:hover{background:#3a3a3a}
+.btn-equals{background:#f0a500;color:#000;grid-column:span 2}
+.btn-equals:hover{background:#ffd54f}
+.btn-special{background:#2a2a2a;color:#f0a500}
+.btn-special:hover{background:#3a3a3a}
+</style>
+</head>
+<body>
+<div class="calculator">
+  <div class="display">
+    <div class="expression" id="expression"></div>
+    <div class="result" id="result">0</div>
+  </div>
+  <div class="buttons">
+    <button class="btn-clear" onclick="clearAll()">AC</button>
+    <button class="btn-special" onclick="deleteLast()">⌫</button>
+    <button class="btn-operator" onclick="appendVal('%')">%</button>
+    <button class="btn-number" onclick="appendVal('7')">7</button>
+    <button class="btn-number" onclick="appendVal('8')">8</button>
+    <button class="btn-number" onclick="appendVal('9')">9</button>
+    <button class="btn-operator" onclick="appendVal('/')">÷</button>
+    <button class="btn-number" onclick="appendVal('4')">4</button>
+    <button class="btn-number" onclick="appendVal('5')">5</button>
+    <button class="btn-number" onclick="appendVal('6')">6</button>
+    <button class="btn-operator" onclick="appendVal('*')">×</button>
+    <button class="btn-number" onclick="appendVal('1')">1</button>
+    <button class="btn-number" onclick="appendVal('2')">2</button>
+    <button class="btn-number" onclick="appendVal('3')">3</button>
+    <button class="btn-operator" onclick="appendVal('-')">−</button>
+    <button class="btn-number" onclick="appendVal('0')">0</button>
+    <button class="btn-number" onclick="appendVal('.')">.</button>
+    <button class="btn-special" onclick="toggleSign()">+/−</button>
+    <button class="btn-operator" onclick="appendVal('+')">+</button>
+    <button class="btn-equals" onclick="calculate()">=</button>
+  </div>
+</div>
+<script>
+let current='';
+let expression='';
+
+function appendVal(val){
+if(['+','-','*','/','%'].includes(val)){
+if(current===''&&expression==='')return;
+expression+=current+val;
+document.getElementById('expression').textContent=expression.replace(/\*/g,'×').replace(/\//g,'÷');
+current='';
+}else{
+if(val==='.'&&current.includes('.'))return;
+current+=val;
+}
+document.getElementById('result').textContent=current||'0';
+}
+
+function clearAll(){
+current='';expression='';
+document.getElementById('result').textContent='0';
+document.getElementById('expression').textContent='';
+}
+
+function deleteLast(){
+current=current.slice(0,-1);
+document.getElementById('result').textContent=current||'0';
+}
+
+function toggleSign(){
+if(current==='')return;
+current=current.startsWith('-')?current.slice(1):'-'+current;
+document.getElementById('result').textContent=current;
+}
+
+function calculate(){
+try{
+const full=expression+current;
+if(!full)return;
+const result=Function('"use strict";return ('+full+')')();
+document.getElementById('expression').textContent=full.replace(/\*/g,'×').replace(/\//g,'÷')+'=';
+document.getElementById('result').textContent=parseFloat(result.toFixed(10));
+current=String(result);
+expression='';
+}catch(e){
+document.getElementById('result').textContent='Error';
+current='';expression='';
+}
+}
+
+document.addEventListener('keydown',e=>{
+if(e.key>='0'&&e.key<='9')appendVal(e.key);
+else if(e.key==='.')appendVal('.');
+else if(e.key==='+'||e.key==='-'||e.key==='*'||e.key==='/')appendVal(e.key);
+else if(e.key==='Enter'||e.key==='=')calculate();
+else if(e.key==='Backspace')deleteLast();
+else if(e.key==='Escape')clearAll();
+});
+</script>
+</body>
+</html>
