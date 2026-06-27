@@ -84,9 +84,14 @@ let expr='';let justCalc=false;let sciOpen=false;let touchStartY=0;
 
 function updateDisplay(val){
 document.getElementById('result').textContent=val||'0';
-document.getElementById('acBtn').textContent=expr===''?'AC':'C';
+document.getElementById('acBtn').textContent=(expr===''||expr==='0'||justCalc)?'AC':'C';
 }
-function appendNum(n){if(justCalc){expr='';justCalc=false}if(expr==='0')expr=n;else expr+=n;updateDisplay(expr)}
+function appendNum(n){
+if(justCalc){expr='';justCalc=false}
+if(expr==='0')expr=n;
+else expr+=n;
+updateDisplay(expr);
+}
 function appendDot(){if(justCalc){expr='0';justCalc=false}const p=expr.split(/[\+\-\*\/]/);if(!p[p.length-1].includes('.'))expr+='.';updateDisplay(expr)}
 function appendOp(op){justCalc=false;if(expr===''&&op==='-'){expr='-';updateDisplay(expr);return}if(!expr)return;if(['+','-','*','/'].includes(expr.slice(-1)))expr=expr.slice(0,-1);expr+=op;updateDisplay(expr)}
 function appendSci(fn){if(justCalc){expr='';justCalc=false}expr+=fn;updateDisplay(expr);closeSci()}
