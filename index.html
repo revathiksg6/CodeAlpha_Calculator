@@ -10,11 +10,11 @@ html,body{height:100%;overflow:hidden;background:#000}
 body{display:flex;justify-content:center;align-items:center;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
 .calculator{width:100vw;height:100dvh;max-width:420px;display:flex;flex-direction:column;position:relative;overflow:hidden}
 .display{flex:1;display:flex;flex-direction:column;justify-content:flex-end;padding:15px 20px 8px}
-.swipe-hint{text-align:center;color:#555;font-size:0.75rem;margin-bottom:4px;letter-spacing:0.5px}
+.swipe-hint{text-align:center;color:#aaa;font-size:0.75rem;margin-bottom:4px;letter-spacing:0.5px}
 .expression{color:#555;font-size:0.9rem;text-align:right;min-height:20px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:4px}
 .result{color:#fff;font-size:3.2rem;font-weight:300;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .main-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:10px 12px 25px}
-button{height:72px;border:none;border-radius:50%;font-size:1rem;font-weight:500;cursor:pointer;transition:opacity 0.15s;-webkit-tap-highlight-color:transparent;letter-spacing:-0.3px}
+button{height:72px;border:none;border-radius:50%;font-size:1rem;font-weight:500;cursor:pointer;transition:opacity 0.15s;-webkit-tap-highlight-color:transparent}
 button:active{opacity:0.6}
 .btn-clear{background:#333;color:#00e5ff;font-weight:700}
 .btn-special{background:#333;color:#80deea}
@@ -81,15 +81,20 @@ button:active{opacity:0.6}
 </div>
 <script>
 let expr='';
+let result='';
 let justCalc=false;
 let sciOpen=false;
 let touchStartY=0;
 
+function setAC(){
+  document.getElementById('acBtn').textContent='AC';
+}
+function setC(){
+  document.getElementById('acBtn').textContent='C';
+}
+
 function updateDisplay(val){
-  const display=val||'0';
-  document.getElementById('result').textContent=display;
-  // AC shows when empty or after calculation, C shows when typing
-  document.getElementById('acBtn').textContent=(expr==='')?'AC':'C';
+  document.getElementById('result').textContent=val||'0';
 }
 
 function appendNum(n){
@@ -97,56 +102,73 @@ function appendNum(n){
     expr='';
     justCalc=false;
     document.getElementById('expression').textContent='';
+    setAC();
   }
   if(expr==='0')expr=n;
   else expr+=n;
   updateDisplay(expr);
+  setC();
 }
 
 function appendDot(){
-  if(justCalc){expr='0';justCalc=false;}
+  if(justCalc){expr='0';justCalc=false;setAC();}
   const p=expr.split(/[\+\-\*\/]/);
   if(!p[p.length-1].includes('.'))expr+='.';
   updateDisplay(expr);
+  setC();
 }
 
 function appendOp(op){
-  if(justCalc)justCalc=false;
-  if(expr===''&&op==='-'){expr='-';updateDisplay(expr);return;}
+  if(justCalc){
+    expr=result;
+    justCalc=false;
+    document.getElementById('expression').textContent='';
+  }
+  if(expr===''&&op==='-'){expr='-';updateDisplay(expr);setC();return;}
   if(!expr)return;
   if(['+','-','*','/'].includes(expr.slice(-1)))expr=expr.slice(0,-1);
   expr+=op;
   updateDisplay(expr);
+  setC();
 }
 
 function appendSci(fn){
-  if(justCalc){expr='';justCalc=false;}
+  if(justCalc){expr='';justCalc=false;setAC();}
   expr+=fn;
   updateDisplay(expr);
+  setC();
   closeSci();
 }
 
 function appendVal(val){
-  if(justCalc){expr='';justCalc=false;}
+  if(justCalc){expr='';justCalc=false;setAC();}
   if(val==='Math.PI')expr+=Math.PI;
   else if(val==='Math.E')expr+=Math.E;
   else if(val==='^')expr+='**';
   else expr+=val;
   updateDisplay(expr);
+  setC();
 }
 
 function clearAll(){
-  expr='';
+  expr='';result='';
   justCalc=false;
   document.getElementById('expression').textContent='';
-  document.getElementById('acBtn').textContent='AC';
   document.getElementById('result').textContent='0';
+  setAC();
 }
 
 function deleteLast(){
-  if(justCalc){expr='';justCalc=false;updateDisplay('0');return;}
+  if(justCalc){
+    expr='';result='';
+    justCalc=false;
+    updateDisplay('0');
+    setAC();
+    return;
+  }
   expr=expr.slice(0,-1);
   updateDisplay(expr||'0');
+  if(!expr)setAC();
 }
 
 function toggleSign(){
@@ -174,14 +196,16 @@ function calculate(){
     const d=expr.replace(/\*\*/g,'^').replace(/Math\.sqrt/g,'√').replace(/Math\.sin/g,'sin').replace(/Math\.cos/g,'cos').replace(/Math\.tan/g,'tan').replace(/Math\.log10/g,'log').replace(/Math\.log/g,'ln').replace(/Math\.PI/g,'π').replace(/Math\.E/g,'e');
     document.getElementById('expression').textContent=d+'=';
     const r=Function('"use strict";const factorial='+factorial.toString()+';return('+expr+')')();
-    expr=String(parseFloat(r.toFixed(10)));
-    document.getElementById('result').textContent=expr;
-    document.getElementById('acBtn').textContent='AC';
+    result=String(parseFloat(r.toFixed(10)));
+    expr='';
+    updateDisplay(result);
+    setAC();
     justCalc=true;
   }catch(e){
     document.getElementById('result').textContent='Error';
-    expr='';
+    expr='';result='';
     justCalc=false;
+    setAC();
   }
 }
 
