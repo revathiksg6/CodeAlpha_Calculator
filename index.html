@@ -10,25 +10,25 @@ html,body{height:100%;overflow:hidden;background:#000}
 body{display:flex;justify-content:center;align-items:center;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
 .calculator{width:100vw;height:100dvh;max-width:420px;display:flex;flex-direction:column;position:relative;overflow:hidden}
 .display{flex:1;display:flex;flex-direction:column;justify-content:flex-end;padding:15px 20px 8px}
-.swipe-hint{text-align:center;color:#222;font-size:0.7rem;margin-bottom:4px}
-.expression{color:#444;font-size:0.9rem;text-align:right;min-height:20px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:4px}
+.swipe-hint{text-align:center;color:#555;font-size:0.75rem;margin-bottom:4px;letter-spacing:0.5px}
+.expression{color:#555;font-size:0.9rem;text-align:right;min-height:20px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:4px}
 .result{color:#fff;font-size:3.2rem;font-weight:300;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .main-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:10px 12px 25px}
-button{height:72px;border:none;border-radius:50%;font-size:1.2rem;font-weight:400;cursor:pointer;transition:opacity 0.15s;-webkit-tap-highlight-color:transparent}
+button{height:72px;border:none;border-radius:50%;font-size:1rem;font-weight:500;cursor:pointer;transition:opacity 0.15s;-webkit-tap-highlight-color:transparent;letter-spacing:-0.3px}
 button:active{opacity:0.6}
-.btn-clear{background:#333;color:#00e5ff;font-weight:700;font-size:1rem}
-.btn-special{background:#333;color:#80deea;font-size:1rem}
-.btn-operator{background:#00bcd4;color:#000;font-size:1.4rem}
-.btn-number{background:#1c1c1e;color:#fff}
-.btn-backspace{background:#333;color:#00e5ff;font-size:1rem}
-.btn-equals{background:linear-gradient(135deg,#00e5ff,#00bcd4);color:#000;font-size:1.4rem;font-weight:700}
+.btn-clear{background:#333;color:#00e5ff;font-weight:700}
+.btn-special{background:#333;color:#80deea}
+.btn-operator{background:#00bcd4;color:#000;font-size:1.3rem}
+.btn-number{background:#1c1c1e;color:#fff;font-size:1.2rem}
+.btn-backspace{background:#333;color:#00e5ff}
+.btn-equals{background:linear-gradient(135deg,#00e5ff,#00bcd4);color:#000;font-size:1.3rem;font-weight:700}
 .sci-panel{position:absolute;bottom:-260px;left:0;right:0;background:#111;border-radius:20px 20px 0 0;padding:12px;transition:bottom 0.3s ease;z-index:10}
 .sci-panel.open{bottom:0}
 .sci-handle{width:36px;height:4px;background:#333;border-radius:2px;margin:0 auto 12px}
 .sci-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 .btn-sci{height:52px;border:none;border-radius:12px;background:#1c1c1e;color:#00e5ff;font-size:0.9rem;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .btn-sci:active{opacity:0.6}
-.sci-close{text-align:center;color:#333;font-size:0.7rem;padding:8px 0 0}
+.sci-close{text-align:center;color:#444;font-size:0.7rem;padding:8px 0 0}
 </style>
 </head>
 <body>
@@ -86,12 +86,18 @@ let sciOpen=false;
 let touchStartY=0;
 
 function updateDisplay(val){
-  document.getElementById('result').textContent=val||'0';
-  document.getElementById('acBtn').textContent=(expr===''||expr==='0'||justCalc)?'AC':'C';
+  const display=val||'0';
+  document.getElementById('result').textContent=display;
+  // AC shows when empty or after calculation, C shows when typing
+  document.getElementById('acBtn').textContent=(expr==='')?'AC':'C';
 }
 
 function appendNum(n){
-  if(justCalc){expr='';justCalc=false;}
+  if(justCalc){
+    expr='';
+    justCalc=false;
+    document.getElementById('expression').textContent='';
+  }
   if(expr==='0')expr=n;
   else expr+=n;
   updateDisplay(expr);
@@ -105,7 +111,7 @@ function appendDot(){
 }
 
 function appendOp(op){
-  justCalc=false;
+  if(justCalc)justCalc=false;
   if(expr===''&&op==='-'){expr='-';updateDisplay(expr);return;}
   if(!expr)return;
   if(['+','-','*','/'].includes(expr.slice(-1)))expr=expr.slice(0,-1);
@@ -133,7 +139,8 @@ function clearAll(){
   expr='';
   justCalc=false;
   document.getElementById('expression').textContent='';
-  updateDisplay('0');
+  document.getElementById('acBtn').textContent='AC';
+  document.getElementById('result').textContent='0';
 }
 
 function deleteLast(){
@@ -168,9 +175,14 @@ function calculate(){
     document.getElementById('expression').textContent=d+'=';
     const r=Function('"use strict";const factorial='+factorial.toString()+';return('+expr+')')();
     expr=String(parseFloat(r.toFixed(10)));
-    updateDisplay(expr);
+    document.getElementById('result').textContent=expr;
+    document.getElementById('acBtn').textContent='AC';
     justCalc=true;
-  }catch(e){updateDisplay('Error');expr='';}
+  }catch(e){
+    document.getElementById('result').textContent='Error';
+    expr='';
+    justCalc=false;
+  }
 }
 
 function openSci(){sciOpen=true;document.getElementById('sciPanel').classList.add('open');}
