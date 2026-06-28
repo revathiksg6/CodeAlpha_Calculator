@@ -10,15 +10,15 @@ html,body{height:100%;overflow:hidden;background:#000}
 body{display:flex;justify-content:center;align-items:center;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
 .calculator{width:100vw;height:100dvh;max-width:420px;display:flex;flex-direction:column;position:relative;overflow:hidden}
 .display{flex:1;display:flex;flex-direction:column;justify-content:flex-end;padding:15px 20px 8px}
-.swipe-hint{text-align:center;color:#aaa;font-size:0.75rem;margin-bottom:4px;letter-spacing:0.5px}
+.swipe-hint{text-align:center;color:#aaa;font-size:0.75rem;margin-bottom:4px}
 .expression{color:#555;font-size:0.9rem;text-align:right;min-height:20px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:4px}
 .result-row{display:flex;align-items:center;justify-content:flex-end;gap:8px}
 .result{color:#fff;font-size:3rem;font-weight:300;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
-.copy-btn{background:none;border:1px solid #333;border-radius:8px;color:#aaa;font-size:0.7rem;padding:4px 8px;cursor:pointer;white-space:nowrap;height:fit-content;flex-shrink:0}
+.copy-btn{background:none;border:1px solid #333;border-radius:8px;color:#aaa;font-size:0.7rem;padding:4px 8px;cursor:pointer;white-space:nowrap;flex-shrink:0}
 .copy-btn:active{background:#333}
 .main-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:10px 12px 20px}
-button{height:72px;border:none;border-radius:50%;font-size:1rem;font-weight:500;cursor:pointer;transition:transform 0.1s,box-shadow 0.1s;-webkit-tap-highlight-color:transparent}
-button:active{transform:scale(0.88);box-shadow:0 0 15px rgba(0,229,255,0.3)}
+button{height:72px;border:none;border-radius:50%;font-size:1rem;font-weight:500;cursor:pointer;transition:transform 0.1s;-webkit-tap-highlight-color:transparent}
+button:active{transform:scale(0.88)}
 .btn-clear{background:#333;color:#00e5ff;font-weight:700}
 .btn-special{background:#333;color:#80deea}
 .btn-operator{background:#00bcd4;color:#000;font-size:1.3rem}
@@ -87,18 +87,18 @@ button:active{transform:scale(0.88);box-shadow:0 0 15px rgba(0,229,255,0.3)}
   <div class="sci-panel" id="sciPanel">
     <div class="sci-handle"></div>
     <div class="sci-grid">
-      <button class="btn-sci" onclick="appendSci('Math.sqrt(','√(')">√</button>
-      <button class="btn-sci" onclick="appendSci('Math.PI','π')">π</button>
-      <button class="btn-sci" onclick="appendSci('**','^')">xʸ</button>
-      <button class="btn-sci" onclick="appendSci('factorial(','!')">n!</button>
-      <button class="btn-sci" onclick="appendSci('Math.sin(','sin(')">sin</button>
-      <button class="btn-sci" onclick="appendSci('Math.cos(','cos(')">cos</button>
-      <button class="btn-sci" onclick="appendSci('Math.tan(','tan(')">tan</button>
-      <button class="btn-sci" onclick="appendSci('Math.log10(','log(')">log</button>
-      <button class="btn-sci" onclick="appendSci('Math.log(','ln(')">ln</button>
-      <button class="btn-sci" onclick="appendSci('Math.E','e')">e</button>
-      <button class="btn-sci" onclick="appendSci('(','(')"> ( </button>
-      <button class="btn-sci" onclick="appendSci(')',')')"> ) </button>
+      <button class="btn-sci" onclick="sci('Math.sqrt(','√(')">√</button>
+      <button class="btn-sci" onclick="sci('Math.PI','π')">π</button>
+      <button class="btn-sci" onclick="sci('**','^')">xʸ</button>
+      <button class="btn-sci" onclick="sci('factorial(','n!(')">n!</button>
+      <button class="btn-sci" onclick="sci('Math.sin(','sin(')">sin</button>
+      <button class="btn-sci" onclick="sci('Math.cos(','cos(')">cos</button>
+      <button class="btn-sci" onclick="sci('Math.tan(','tan(')">tan</button>
+      <button class="btn-sci" onclick="sci('Math.log10(','log(')">log</button>
+      <button class="btn-sci" onclick="sci('Math.log(','ln(')">ln</button>
+      <button class="btn-sci" onclick="sci('Math.E','e')">e</button>
+      <button class="btn-sci" onclick="sci('(','(')">(</button>
+      <button class="btn-sci" onclick="sci(')',')')">)</button>
     </div>
     <div class="sci-close">↓ swipe down to close</div>
   </div>
@@ -118,8 +118,9 @@ button:active{transform:scale(0.88);box-shadow:0 0 15px rgba(0,229,255,0.3)}
 <div class="toast" id="toast"></div>
 
 <script>
-let calcExpr='';   // actual math expression for calculation
-let dispExpr='';   // display expression (user-friendly)
+// Two parallel expressions: calc (for eval) and disp (for display)
+let calc='';
+let disp='';
 let lastResult='';
 let justCalc=false;
 let sciOpen=false;
@@ -135,89 +136,72 @@ function showToast(msg){
   setTimeout(()=>t.classList.remove('show'),1800);
 }
 
-function setDisplay(val){
-  // Show dispExpr in result if typing, else show result
-  document.getElementById('result').textContent=val||'0';
+function updateResult(){
+  document.getElementById('result').textContent=disp||'0';
 }
 
 function appendNum(n){
-  if(justCalc){calcExpr='';dispExpr='';justCalc=false;document.getElementById('expression').textContent='';}
-  if(calcExpr==='0'&&n!=='.'){calcExpr=n;dispExpr=n;}
-  else{calcExpr+=n;dispExpr+=n;}
-  setDisplay(dispExpr);
+  if(justCalc){calc='';disp='';justCalc=false;document.getElementById('expression').textContent='';}
+  if(calc==='0'){calc=n;disp=n;}
+  else{calc+=n;disp+=n;}
+  updateResult();
 }
 
 function appendDot(){
-  if(justCalc){calcExpr='0';dispExpr='0';justCalc=false;}
-  const p=calcExpr.split(/[\+\-\*\/]/);
-  if(!p[p.length-1].includes('.')){calcExpr+='.';dispExpr+='.';}
-  setDisplay(dispExpr);
+  if(justCalc){calc='0.';disp='0.';justCalc=false;}
+  else{
+    const parts=calc.split(/[\+\-\*\/]/);
+    if(!parts[parts.length-1].includes('.')){calc+='.';disp+='.';}
+  }
+  updateResult();
 }
 
 function appendOp(op){
-  if(justCalc){calcExpr=lastResult;dispExpr=lastResult;justCalc=false;document.getElementById('expression').textContent='';}
-  if(calcExpr===''&&op==='-'){calcExpr='-';dispExpr='-';setDisplay(dispExpr);return;}
-  if(!calcExpr)return;
-  const lastC=calcExpr.slice(-1);
-  const lastD=dispExpr.slice(-1);
-  if(['+','-','*','/'].includes(lastC)){calcExpr=calcExpr.slice(0,-1);dispExpr=dispExpr.slice(0,-1);}
-  const dispOp=op==='*'?'×':op==='/'?'÷':op;
-  calcExpr+=op;dispExpr+=dispOp;
-  setDisplay(dispExpr);
+  if(justCalc){calc=lastResult;disp=lastResult;justCalc=false;document.getElementById('expression').textContent='';}
+  if(calc===''&&op==='-'){calc='-';disp='-';updateResult();return;}
+  if(!calc)return;
+  if(['+','-','*','/'].includes(calc.slice(-1))){calc=calc.slice(0,-1);disp=disp.slice(0,-1);}
+  const dispOp={'*':'×','/':'÷'}[op]||op;
+  calc+=op;disp+=dispOp;
+  updateResult();
 }
 
-function appendSci(calcVal,dispVal){
-  if(justCalc){calcExpr='';dispExpr='';justCalc=false;}
-  calcExpr+=calcVal;
-  dispExpr+=dispVal;
-  setDisplay(dispExpr);
+// sci function: calcVal = actual JS, dispVal = what user sees
+function sci(calcVal,dispVal){
+  if(justCalc){calc='';disp='';justCalc=false;}
+  calc+=calcVal;
+  disp+=dispVal;
+  updateResult();
   closeSci();
 }
 
 function clearAll(){
-  calcExpr='';dispExpr='';lastResult='';justCalc=false;
+  calc='';disp='';lastResult='';justCalc=false;
   document.getElementById('expression').textContent='';
-  setDisplay('0');
+  document.getElementById('result').textContent='0';
 }
 
 function deleteLast(){
-  if(justCalc){calcExpr='';dispExpr='';lastResult='';justCalc=false;setDisplay('0');return;}
-  // Need to remove last token carefully
-  // Simple approach: remove last char from both
-  if(dispExpr.slice(-1)==='('){
-    // remove function name too
-    const fns=['sin(','cos(','tan(','log(','ln(','√(','!('];
-    let removed=false;
-    for(const fn of fns){
-      if(dispExpr.endsWith(fn)){
-        dispExpr=dispExpr.slice(0,-fn.length);
-        // find corresponding calc fn
-        const map={'sin(':'Math.sin(','cos(':'Math.cos(','tan(':'Math.tan(','log(':'Math.log10(','ln(':'Math.log(','√(':'Math.sqrt(','!(':  'factorial('};
-        calcExpr=calcExpr.slice(0,-(map[fn]?.length||fn.length));
-        removed=true;break;
-      }
-    }
-    if(!removed){calcExpr=calcExpr.slice(0,-1);dispExpr=dispExpr.slice(0,-1);}
-  } else {
-    calcExpr=calcExpr.slice(0,-1);
-    dispExpr=dispExpr.slice(0,-1);
-  }
-  setDisplay(dispExpr||'0');
+  if(justCalc){calc='';disp='';lastResult='';justCalc=false;document.getElementById('result').textContent='0';return;}
+  calc=calc.slice(0,-1);
+  disp=disp.slice(0,-1);
+  document.getElementById('result').textContent=disp||'0';
 }
 
 function toggleSign(){
-  if(!calcExpr||calcExpr==='0')return;
-  if(calcExpr.startsWith('-')){calcExpr=calcExpr.slice(1);dispExpr=dispExpr.slice(1);}
-  else{calcExpr='-'+calcExpr;dispExpr='-'+dispExpr;}
-  setDisplay(dispExpr);
+  if(!calc||calc==='0')return;
+  if(calc.startsWith('-')){calc=calc.slice(1);disp=disp.slice(1);}
+  else{calc='-'+calc;disp='-'+disp;}
+  updateResult();
 }
 
 function percentage(){
   try{
-    if(!calcExpr)return;
-    const val=parseFloat(Function('"use strict";return('+calcExpr+')')())/100;
-    calcExpr=String(val);dispExpr=String(val);
-    setDisplay(dispExpr);
+    if(!calc)return;
+    const val=Function('"use strict";return('+calc+')')();
+    const pct=parseFloat((val/100).toFixed(10));
+    calc=String(pct);disp=String(pct);
+    updateResult();
   }catch(e){showToast('Invalid');}
 }
 
@@ -230,28 +214,27 @@ function factorial(n){
 }
 
 function calculate(){
-  if(!calcExpr)return;
-  if(/\/\s*0(?!\d)/.test(calcExpr)){
-    document.getElementById('expression').textContent=dispExpr+'=';
-    setDisplay('Cannot ÷ 0');
-    calcExpr='';dispExpr='';lastResult='';justCalc=false;
-    return;
+  if(!calc)return;
+  if(/\/0(?!\d)/.test(calc)){
+    document.getElementById('expression').textContent=disp+'=';
+    document.getElementById('result').textContent='Cannot ÷ 0';
+    calc='';disp='';lastResult='';justCalc=false;return;
   }
   try{
-    document.getElementById('expression').textContent=dispExpr+'=';
-    const r=Function('"use strict";const factorial='+factorial.toString()+';return('+calcExpr+')')();
-    if(!isFinite(r)){setDisplay('Infinity');calcExpr='';dispExpr='';lastResult='';justCalc=false;return;}
-    if(isNaN(r)){setDisplay('Invalid');calcExpr='';dispExpr='';lastResult='';justCalc=false;return;}
+    document.getElementById('expression').textContent=disp+'=';
+    const r=Function('"use strict";const factorial='+factorial.toString()+';return('+calc+')')();
+    if(!isFinite(r)){document.getElementById('result').textContent='Infinity';calc='';disp='';lastResult='';justCalc=false;return;}
+    if(isNaN(r)){document.getElementById('result').textContent='Invalid';calc='';disp='';lastResult='';justCalc=false;return;}
     lastResult=String(parseFloat(r.toFixed(10)));
-    history.unshift({expr:dispExpr,result:lastResult});
+    history.unshift({expr:disp,result:lastResult});
     if(history.length>50)history.pop();
     localStorage.setItem('calc_history',JSON.stringify(history));
-    calcExpr='';dispExpr='';
-    setDisplay(lastResult);
+    calc='';disp='';
+    document.getElementById('result').textContent=lastResult;
     justCalc=true;
   }catch(e){
-    setDisplay('Error');
-    calcExpr='';dispExpr='';lastResult='';justCalc=false;
+    document.getElementById('result').textContent='Error';
+    calc='';disp='';lastResult='';justCalc=false;
   }
 }
 
@@ -267,13 +250,13 @@ function openHistory(){
   if(history.length===0){
     list.innerHTML='<div class="history-empty">No calculations yet</div>';
   }else{
-    history.forEach((h)=>{
+    history.forEach(h=>{
       const item=document.createElement('div');
       item.className='history-item';
       item.innerHTML=`<div class="history-expr">${h.expr}</div><div class="history-result">${h.result}</div>`;
       item.onclick=()=>{
-        calcExpr=h.result;dispExpr=h.result;lastResult=h.result;justCalc=true;
-        setDisplay(h.result);
+        calc=h.result;disp=h.result;lastResult=h.result;justCalc=true;
+        document.getElementById('result').textContent=h.result;
         document.getElementById('expression').textContent=h.expr+'=';
         closeHistory();
       };
@@ -285,7 +268,6 @@ function openHistory(){
 
 function closeHistory(){document.getElementById('historyPanel').classList.remove('open')}
 function clearHistory(){history=[];localStorage.setItem('calc_history','[]');openHistory();}
-
 function openSci(){sciOpen=true;document.getElementById('sciPanel').classList.add('open');}
 function closeSci(){sciOpen=false;document.getElementById('sciPanel').classList.remove('open');}
 
