@@ -28,7 +28,7 @@ button:active{opacity:0.6}
 .sci-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 .btn-sci{height:52px;border:none;border-radius:12px;background:#1c1c1e;color:#00e5ff;font-size:0.9rem;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .btn-sci:active{opacity:0.6}
-.sci-close{text-align:center;color:#444;font-size:0.7rem;padding:8px 0 0}
+.sci-close{text-align:center;color:#555;font-size:0.75rem;padding:8px 0 0}
 </style>
 </head>
 <body>
@@ -81,19 +81,15 @@ button:active{opacity:0.6}
 </div>
 <script>
 let expr='';
-let result='';
+let lastResult='';
 let justCalc=false;
 let sciOpen=false;
 let touchStartY=0;
 
-function setAC(){
-  document.getElementById('acBtn').textContent='AC';
-}
-function setC(){
-  document.getElementById('acBtn').textContent='C';
-}
+function showAC(){document.getElementById('acBtn').textContent='AC'}
+function showC(){document.getElementById('acBtn').textContent='C'}
 
-function updateDisplay(val){
+function setDisplay(val){
   document.getElementById('result').textContent=val||'0';
 }
 
@@ -102,92 +98,86 @@ function appendNum(n){
     expr='';
     justCalc=false;
     document.getElementById('expression').textContent='';
-    setAC();
+    showAC();
   }
   if(expr==='0')expr=n;
   else expr+=n;
-  updateDisplay(expr);
-  setC();
+  setDisplay(expr);
+  showC();
 }
 
 function appendDot(){
-  if(justCalc){expr='0';justCalc=false;setAC();}
+  if(justCalc){expr='0';justCalc=false;showAC();}
   const p=expr.split(/[\+\-\*\/]/);
   if(!p[p.length-1].includes('.'))expr+='.';
-  updateDisplay(expr);
-  setC();
+  setDisplay(expr);
+  showC();
 }
 
 function appendOp(op){
   if(justCalc){
-    expr=result;
+    expr=lastResult;
     justCalc=false;
     document.getElementById('expression').textContent='';
   }
-  if(expr===''&&op==='-'){expr='-';updateDisplay(expr);setC();return;}
+  if(expr===''&&op==='-'){expr='-';setDisplay(expr);showC();return;}
   if(!expr)return;
   if(['+','-','*','/'].includes(expr.slice(-1)))expr=expr.slice(0,-1);
   expr+=op;
-  updateDisplay(expr);
-  setC();
+  setDisplay(expr);
+  showC();
 }
 
 function appendSci(fn){
-  if(justCalc){expr='';justCalc=false;setAC();}
+  if(justCalc){expr='';justCalc=false;showAC();}
   expr+=fn;
-  updateDisplay(expr);
-  setC();
+  setDisplay(expr);
+  showC();
   closeSci();
 }
 
 function appendVal(val){
-  if(justCalc){expr='';justCalc=false;setAC();}
+  if(justCalc){expr='';justCalc=false;showAC();}
   if(val==='Math.PI')expr+=Math.PI;
   else if(val==='Math.E')expr+=Math.E;
   else if(val==='^')expr+='**';
   else expr+=val;
-  updateDisplay(expr);
-  setC();
+  setDisplay(expr);
+  showC();
 }
 
 function clearAll(){
-  expr='';result='';
-  justCalc=false;
+  expr='';lastResult='';justCalc=false;
   document.getElementById('expression').textContent='';
-  document.getElementById('result').textContent='0';
-  setAC();
+  setDisplay('0');
+  showAC();
 }
 
 function deleteLast(){
   if(justCalc){
-    expr='';result='';
-    justCalc=false;
-    updateDisplay('0');
-    setAC();
-    return;
+    expr='';lastResult='';justCalc=false;
+    setDisplay('0');showAC();return;
   }
   expr=expr.slice(0,-1);
-  updateDisplay(expr||'0');
-  if(!expr)setAC();
+  setDisplay(expr||'0');
+  if(!expr)showAC();
 }
 
 function toggleSign(){
   if(!expr||expr==='0')return;
   expr=expr.startsWith('-')?expr.slice(1):'-'+expr;
-  updateDisplay(expr);
+  setDisplay(expr);
 }
 
 function percentage(){
-  try{expr=String(parseFloat(eval(expr))/100);updateDisplay(expr);}catch(e){}
+  try{expr=String(parseFloat(eval(expr))/100);setDisplay(expr);}catch(e){}
 }
 
 function factorial(n){
   n=Math.floor(n);
   if(n<0||n>170)return NaN;
   if(n<=1)return 1;
-  let r=1;
-  for(let i=2;i<=n;i++)r*=i;
-  return r;
+  let r=1;for(let i=2;i<=n;i++)r*=i;return r;
 }
 
 function calculate(){
@@ -196,16 +186,15 @@ function calculate(){
     const d=expr.replace(/\*\*/g,'^').replace(/Math\.sqrt/g,'√').replace(/Math\.sin/g,'sin').replace(/Math\.cos/g,'cos').replace(/Math\.tan/g,'tan').replace(/Math\.log10/g,'log').replace(/Math\.log/g,'ln').replace(/Math\.PI/g,'π').replace(/Math\.E/g,'e');
     document.getElementById('expression').textContent=d+'=';
     const r=Function('"use strict";const factorial='+factorial.toString()+';return('+expr+')')();
-    result=String(parseFloat(r.toFixed(10)));
+    lastResult=String(parseFloat(r.toFixed(10)));
     expr='';
-    updateDisplay(result);
-    setAC();
+    setDisplay(lastResult);
+    showAC();
     justCalc=true;
   }catch(e){
-    document.getElementById('result').textContent='Error';
-    expr='';result='';
-    justCalc=false;
-    setAC();
+    setDisplay('Error');
+    expr='';lastResult='';justCalc=false;
+    showAC();
   }
 }
 
