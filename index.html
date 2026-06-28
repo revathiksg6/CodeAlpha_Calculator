@@ -13,8 +13,8 @@ body{display:flex;justify-content:center;align-items:center;font-family:-apple-s
 .swipe-hint{text-align:center;color:#aaa;font-size:0.75rem;margin-bottom:4px;letter-spacing:0.5px}
 .expression{color:#555;font-size:0.9rem;text-align:right;min-height:20px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:4px}
 .result-row{display:flex;align-items:center;justify-content:flex-end;gap:8px}
-.result{color:#fff;font-size:3.2rem;font-weight:300;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
-.copy-btn{background:none;border:1px solid #333;border-radius:8px;color:#aaa;font-size:0.7rem;padding:4px 8px;cursor:pointer;white-space:nowrap;height:fit-content}
+.result{color:#fff;font-size:3rem;font-weight:300;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.copy-btn{background:none;border:1px solid #333;border-radius:8px;color:#aaa;font-size:0.7rem;padding:4px 8px;cursor:pointer;white-space:nowrap;height:fit-content;flex-shrink:0}
 .copy-btn:active{background:#333}
 .main-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:10px 12px 20px}
 button{height:72px;border:none;border-radius:50%;font-size:1rem;font-weight:500;cursor:pointer;transition:transform 0.1s,box-shadow 0.1s;-webkit-tap-highlight-color:transparent}
@@ -32,29 +32,28 @@ button:active{transform:scale(0.88);box-shadow:0 0 15px rgba(0,229,255,0.3)}
 .btn-sci{height:52px;border:none;border-radius:12px;background:#1c1c1e;color:#00e5ff;font-size:0.9rem;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform 0.1s}
 .btn-sci:active{transform:scale(0.88)}
 .sci-close{text-align:center;color:#555;font-size:0.75rem;padding:8px 0 0}
-/* History Panel */
-.history-btn{position:absolute;top:15px;right:15px;background:none;border:1px solid #333;border-radius:10px;color:#aaa;font-size:0.75rem;padding:5px 10px;cursor:pointer;z-index:5}
+.history-btn{position:absolute;top:15px;right:15px;background:#111;border:1px solid #333;border-radius:10px;color:#aaa;font-size:0.75rem;padding:5px 10px;cursor:pointer;z-index:5}
 .history-panel{position:fixed;top:0;right:-100%;width:100%;height:100%;background:#0a0a0a;z-index:2000;transition:right 0.3s ease;overflow-y:auto}
 .history-panel.open{right:0}
 .history-header{display:flex;justify-content:space-between;align-items:center;padding:18px 20px;border-bottom:1px solid #222}
 .history-header h2{color:#00e5ff;font-size:1.1rem;letter-spacing:1px}
+.history-actions{display:flex;gap:10px;align-items:center}
 .history-clear{background:none;border:1px solid #333;color:#aaa;border-radius:8px;padding:5px 12px;cursor:pointer;font-size:0.8rem}
 .close-history{background:none;border:none;color:#aaa;font-size:1.5rem;cursor:pointer}
 .history-list{padding:10px}
 .history-item{padding:12px 15px;border-bottom:1px solid #1a1a1a;cursor:pointer}
-.history-item:hover{background:#111}
+.history-item:active{background:#111}
 .history-expr{color:#555;font-size:0.85rem;margin-bottom:3px}
 .history-result{color:#fff;font-size:1.2rem;font-weight:300}
 .history-empty{text-align:center;padding:60px 20px;color:#333;font-size:0.9rem}
-/* Toast */
-.toast{position:fixed;bottom:40px;left:50%;transform:translateX(-50%);background:#00bcd4;color:#000;padding:8px 20px;border-radius:20px;font-weight:700;font-size:0.85rem;display:none;z-index:9999;letter-spacing:0.5px}
+.toast{position:fixed;bottom:40px;left:50%;transform:translateX(-50%);background:#00bcd4;color:#000;padding:8px 20px;border-radius:20px;font-weight:700;font-size:0.85rem;display:none;z-index:9999}
 .toast.show{display:block;animation:fadeInOut 1.8s ease}
 @keyframes fadeInOut{0%{opacity:0;transform:translateX(-50%) translateY(10px)}15%{opacity:1;transform:translateX(-50%) translateY(0)}85%{opacity:1}100%{opacity:0}}
 </style>
 </head>
 <body>
 <div class="calculator" id="calc">
-  <button class="history-btn" onclick="openHistory()">History</button>
+  <button class="history-btn" onclick="openHistory()">⏱ History</button>
   <div class="display">
     <div class="swipe-hint">↑ swipe up for scientific</div>
     <div class="expression" id="expression"></div>
@@ -88,29 +87,28 @@ button:active{transform:scale(0.88);box-shadow:0 0 15px rgba(0,229,255,0.3)}
   <div class="sci-panel" id="sciPanel">
     <div class="sci-handle"></div>
     <div class="sci-grid">
-      <button class="btn-sci" onclick="appendSci('Math.sqrt(')">√</button>
-      <button class="btn-sci" onclick="appendVal('Math.PI')">π</button>
-      <button class="btn-sci" onclick="appendVal('^')">xʸ</button>
-      <button class="btn-sci" onclick="appendSci('factorial(')">n!</button>
-      <button class="btn-sci" onclick="appendSci('Math.sin(')">sin</button>
-      <button class="btn-sci" onclick="appendSci('Math.cos(')">cos</button>
-      <button class="btn-sci" onclick="appendSci('Math.tan(')">tan</button>
-      <button class="btn-sci" onclick="appendSci('Math.log10(')">log</button>
-      <button class="btn-sci" onclick="appendSci('Math.log(')">ln</button>
-      <button class="btn-sci" onclick="appendVal('Math.E')">e</button>
-      <button class="btn-sci" onclick="appendVal('(')">(</button>
-      <button class="btn-sci" onclick="appendVal(')')">)</button>
+      <button class="btn-sci" onclick="appendSci('Math.sqrt(','√(')">√</button>
+      <button class="btn-sci" onclick="appendSci('Math.PI','π')">π</button>
+      <button class="btn-sci" onclick="appendSci('**','^')">xʸ</button>
+      <button class="btn-sci" onclick="appendSci('factorial(','!')">n!</button>
+      <button class="btn-sci" onclick="appendSci('Math.sin(','sin(')">sin</button>
+      <button class="btn-sci" onclick="appendSci('Math.cos(','cos(')">cos</button>
+      <button class="btn-sci" onclick="appendSci('Math.tan(','tan(')">tan</button>
+      <button class="btn-sci" onclick="appendSci('Math.log10(','log(')">log</button>
+      <button class="btn-sci" onclick="appendSci('Math.log(','ln(')">ln</button>
+      <button class="btn-sci" onclick="appendSci('Math.E','e')">e</button>
+      <button class="btn-sci" onclick="appendSci('(','(')"> ( </button>
+      <button class="btn-sci" onclick="appendSci(')',')')"> ) </button>
     </div>
     <div class="sci-close">↓ swipe down to close</div>
   </div>
 </div>
 
-<!-- History Panel -->
 <div class="history-panel" id="historyPanel">
   <div class="history-header">
     <h2>⏱ HISTORY</h2>
-    <div style="display:flex;gap:10px;align-items:center">
-      <button class="history-clear" onclick="clearHistory()">Clear</button>
+    <div class="history-actions">
+      <button class="history-clear" onclick="clearHistory()">Clear All</button>
       <button class="close-history" onclick="closeHistory()">✕</button>
     </div>
   </div>
@@ -120,7 +118,8 @@ button:active{transform:scale(0.88);box-shadow:0 0 15px rgba(0,229,255,0.3)}
 <div class="toast" id="toast"></div>
 
 <script>
-let expr='';
+let calcExpr='';   // actual math expression for calculation
+let dispExpr='';   // display expression (user-friendly)
 let lastResult='';
 let justCalc=false;
 let sciOpen=false;
@@ -137,70 +136,89 @@ function showToast(msg){
 }
 
 function setDisplay(val){
+  // Show dispExpr in result if typing, else show result
   document.getElementById('result').textContent=val||'0';
 }
 
 function appendNum(n){
-  if(justCalc){expr='';justCalc=false;document.getElementById('expression').textContent='';}
-  if(expr==='0')expr=n;
-  else expr+=n;
-  setDisplay(expr);
+  if(justCalc){calcExpr='';dispExpr='';justCalc=false;document.getElementById('expression').textContent='';}
+  if(calcExpr==='0'&&n!=='.'){calcExpr=n;dispExpr=n;}
+  else{calcExpr+=n;dispExpr+=n;}
+  setDisplay(dispExpr);
 }
 
 function appendDot(){
-  if(justCalc){expr='0';justCalc=false;}
-  const p=expr.split(/[\+\-\*\/]/);
-  if(!p[p.length-1].includes('.'))expr+='.';
-  setDisplay(expr);
+  if(justCalc){calcExpr='0';dispExpr='0';justCalc=false;}
+  const p=calcExpr.split(/[\+\-\*\/]/);
+  if(!p[p.length-1].includes('.')){calcExpr+='.';dispExpr+='.';}
+  setDisplay(dispExpr);
 }
 
 function appendOp(op){
-  if(justCalc){expr=lastResult;justCalc=false;document.getElementById('expression').textContent='';}
-  if(expr===''&&op==='-'){expr='-';setDisplay(expr);return;}
-  if(!expr)return;
-  if(['+','-','*','/'].includes(expr.slice(-1)))expr=expr.slice(0,-1);
-  expr+=op;
-  setDisplay(expr);
+  if(justCalc){calcExpr=lastResult;dispExpr=lastResult;justCalc=false;document.getElementById('expression').textContent='';}
+  if(calcExpr===''&&op==='-'){calcExpr='-';dispExpr='-';setDisplay(dispExpr);return;}
+  if(!calcExpr)return;
+  const lastC=calcExpr.slice(-1);
+  const lastD=dispExpr.slice(-1);
+  if(['+','-','*','/'].includes(lastC)){calcExpr=calcExpr.slice(0,-1);dispExpr=dispExpr.slice(0,-1);}
+  const dispOp=op==='*'?'×':op==='/'?'÷':op;
+  calcExpr+=op;dispExpr+=dispOp;
+  setDisplay(dispExpr);
 }
 
-function appendSci(fn){
-  if(justCalc){expr='';justCalc=false;}
-  expr+=fn;setDisplay(expr);closeSci();
-}
-
-function appendVal(val){
-  if(justCalc){expr='';justCalc=false;}
-  if(val==='Math.PI')expr+=Math.PI;
-  else if(val==='Math.E')expr+=Math.E;
-  else if(val==='^')expr+='**';
-  else expr+=val;
-  setDisplay(expr);
+function appendSci(calcVal,dispVal){
+  if(justCalc){calcExpr='';dispExpr='';justCalc=false;}
+  calcExpr+=calcVal;
+  dispExpr+=dispVal;
+  setDisplay(dispExpr);
+  closeSci();
 }
 
 function clearAll(){
-  expr='';lastResult='';justCalc=false;
+  calcExpr='';dispExpr='';lastResult='';justCalc=false;
   document.getElementById('expression').textContent='';
   setDisplay('0');
 }
 
 function deleteLast(){
-  if(justCalc){expr='';lastResult='';justCalc=false;setDisplay('0');return;}
-  expr=expr.slice(0,-1);
-  setDisplay(expr||'0');
+  if(justCalc){calcExpr='';dispExpr='';lastResult='';justCalc=false;setDisplay('0');return;}
+  // Need to remove last token carefully
+  // Simple approach: remove last char from both
+  if(dispExpr.slice(-1)==='('){
+    // remove function name too
+    const fns=['sin(','cos(','tan(','log(','ln(','√(','!('];
+    let removed=false;
+    for(const fn of fns){
+      if(dispExpr.endsWith(fn)){
+        dispExpr=dispExpr.slice(0,-fn.length);
+        // find corresponding calc fn
+        const map={'sin(':'Math.sin(','cos(':'Math.cos(','tan(':'Math.tan(','log(':'Math.log10(','ln(':'Math.log(','√(':'Math.sqrt(','!(':  'factorial('};
+        calcExpr=calcExpr.slice(0,-(map[fn]?.length||fn.length));
+        removed=true;break;
+      }
+    }
+    if(!removed){calcExpr=calcExpr.slice(0,-1);dispExpr=dispExpr.slice(0,-1);}
+  } else {
+    calcExpr=calcExpr.slice(0,-1);
+    dispExpr=dispExpr.slice(0,-1);
+  }
+  setDisplay(dispExpr||'0');
 }
 
 function toggleSign(){
-  if(!expr||expr==='0')return;
-  expr=expr.startsWith('-')?expr.slice(1):'-'+expr;
-  setDisplay(expr);
+  if(!calcExpr||calcExpr==='0')return;
+  if(calcExpr.startsWith('-')){calcExpr=calcExpr.slice(1);dispExpr=dispExpr.slice(1);}
+  else{calcExpr='-'+calcExpr;dispExpr='-'+dispExpr;}
+  setDisplay(dispExpr);
 }
 
 function percentage(){
   try{
-    if(!expr)return;
-    expr=String(parseFloat(eval(expr))/100);
-    setDisplay(expr);
-  }catch(e){showToast('Invalid expression');}
+    if(!calcExpr)return;
+    const val=parseFloat(Function('"use strict";return('+calcExpr+')')())/100;
+    calcExpr=String(val);dispExpr=String(val);
+    setDisplay(dispExpr);
+  }catch(e){showToast('Invalid');}
 }
 
 function factorial(n){
@@ -212,37 +230,34 @@ function factorial(n){
 }
 
 function calculate(){
-  if(!expr)return;
-  // Check divide by zero
-  if(/\/\s*0(?!\d)/.test(expr)){
-    document.getElementById('expression').textContent=expr+'=';
+  if(!calcExpr)return;
+  if(/\/\s*0(?!\d)/.test(calcExpr)){
+    document.getElementById('expression').textContent=dispExpr+'=';
     setDisplay('Cannot ÷ 0');
-    expr='';lastResult='';justCalc=false;
+    calcExpr='';dispExpr='';lastResult='';justCalc=false;
     return;
   }
   try{
-    const d=expr.replace(/\*\*/g,'^').replace(/Math\.sqrt/g,'√').replace(/Math\.sin/g,'sin').replace(/Math\.cos/g,'cos').replace(/Math\.tan/g,'tan').replace(/Math\.log10/g,'log').replace(/Math\.log/g,'ln').replace(/Math\.PI/g,'π').replace(/Math\.E/g,'e');
-    document.getElementById('expression').textContent=d+'=';
-    const r=Function('"use strict";const factorial='+factorial.toString()+';return('+expr+')')();
-    if(!isFinite(r)){setDisplay('Infinity');expr='';lastResult='';justCalc=false;return;}
-    if(isNaN(r)){setDisplay('Invalid');expr='';lastResult='';justCalc=false;return;}
+    document.getElementById('expression').textContent=dispExpr+'=';
+    const r=Function('"use strict";const factorial='+factorial.toString()+';return('+calcExpr+')')();
+    if(!isFinite(r)){setDisplay('Infinity');calcExpr='';dispExpr='';lastResult='';justCalc=false;return;}
+    if(isNaN(r)){setDisplay('Invalid');calcExpr='';dispExpr='';lastResult='';justCalc=false;return;}
     lastResult=String(parseFloat(r.toFixed(10)));
-    // Save to history
-    history.unshift({expr:d,result:lastResult});
+    history.unshift({expr:dispExpr,result:lastResult});
     if(history.length>50)history.pop();
     localStorage.setItem('calc_history',JSON.stringify(history));
-    expr='';
+    calcExpr='';dispExpr='';
     setDisplay(lastResult);
     justCalc=true;
   }catch(e){
     setDisplay('Error');
-    expr='';lastResult='';justCalc=false;
+    calcExpr='';dispExpr='';lastResult='';justCalc=false;
   }
 }
 
 function copyResult(){
   const val=document.getElementById('result').textContent;
-  if(val==='0'||val==='Error'||val==='Cannot ÷ 0'||val==='Invalid')return;
+  if(['0','Error','Cannot ÷ 0','Invalid','Infinity'].includes(val))return;
   navigator.clipboard.writeText(val).then(()=>showToast('Copied!'));
 }
 
@@ -252,12 +267,12 @@ function openHistory(){
   if(history.length===0){
     list.innerHTML='<div class="history-empty">No calculations yet</div>';
   }else{
-    history.forEach((h,i)=>{
+    history.forEach((h)=>{
       const item=document.createElement('div');
       item.className='history-item';
       item.innerHTML=`<div class="history-expr">${h.expr}</div><div class="history-result">${h.result}</div>`;
       item.onclick=()=>{
-        expr=h.result;lastResult=h.result;justCalc=true;
+        calcExpr=h.result;dispExpr=h.result;lastResult=h.result;justCalc=true;
         setDisplay(h.result);
         document.getElementById('expression').textContent=h.expr+'=';
         closeHistory();
@@ -291,8 +306,8 @@ document.addEventListener('keydown',e=>{
   else if(e.key==='Enter'||e.key==='=')calculate();
   else if(e.key==='Backspace')deleteLast();
   else if(e.key==='Escape')clearAll();
-  else if(e.key==='c'||e.key==='C')copyResult();
-  else if(e.key==='h'||e.key==='H')openHistory();
+  else if(e.key==='c')copyResult();
+  else if(e.key==='h')openHistory();
 });
 </script>
 </body>
