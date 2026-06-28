@@ -12,31 +12,56 @@ body{display:flex;justify-content:center;align-items:center;font-family:-apple-s
 .display{flex:1;display:flex;flex-direction:column;justify-content:flex-end;padding:15px 20px 8px}
 .swipe-hint{text-align:center;color:#aaa;font-size:0.75rem;margin-bottom:4px;letter-spacing:0.5px}
 .expression{color:#555;font-size:0.9rem;text-align:right;min-height:20px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:4px}
-.result{color:#fff;font-size:3.2rem;font-weight:300;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.main-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:10px 12px 25px}
-button{height:72px;border:none;border-radius:50%;font-size:1rem;font-weight:500;cursor:pointer;transition:opacity 0.15s;-webkit-tap-highlight-color:transparent}
-button:active{opacity:0.6}
+.result-row{display:flex;align-items:center;justify-content:flex-end;gap:8px}
+.result{color:#fff;font-size:3.2rem;font-weight:300;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.copy-btn{background:none;border:1px solid #333;border-radius:8px;color:#aaa;font-size:0.7rem;padding:4px 8px;cursor:pointer;white-space:nowrap;height:fit-content}
+.copy-btn:active{background:#333}
+.main-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:10px 12px 20px}
+button{height:72px;border:none;border-radius:50%;font-size:1rem;font-weight:500;cursor:pointer;transition:transform 0.1s,box-shadow 0.1s;-webkit-tap-highlight-color:transparent}
+button:active{transform:scale(0.88);box-shadow:0 0 15px rgba(0,229,255,0.3)}
 .btn-clear{background:#333;color:#00e5ff;font-weight:700}
 .btn-special{background:#333;color:#80deea}
 .btn-operator{background:#00bcd4;color:#000;font-size:1.3rem}
 .btn-number{background:#1c1c1e;color:#fff;font-size:1.2rem}
 .btn-backspace{background:#333;color:#00e5ff}
 .btn-equals{background:linear-gradient(135deg,#00e5ff,#00bcd4);color:#000;font-size:1.3rem;font-weight:700}
-.sci-panel{position:absolute;bottom:-260px;left:0;right:0;background:#111;border-radius:20px 20px 0 0;padding:12px;transition:bottom 0.3s ease;z-index:10}
+.sci-panel{position:absolute;bottom:-280px;left:0;right:0;background:#111;border-radius:20px 20px 0 0;padding:12px;transition:bottom 0.3s ease;z-index:10}
 .sci-panel.open{bottom:0}
 .sci-handle{width:36px;height:4px;background:#333;border-radius:2px;margin:0 auto 12px}
 .sci-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-.btn-sci{height:52px;border:none;border-radius:12px;background:#1c1c1e;color:#00e5ff;font-size:0.9rem;cursor:pointer;-webkit-tap-highlight-color:transparent}
-.btn-sci:active{opacity:0.6}
+.btn-sci{height:52px;border:none;border-radius:12px;background:#1c1c1e;color:#00e5ff;font-size:0.9rem;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform 0.1s}
+.btn-sci:active{transform:scale(0.88)}
 .sci-close{text-align:center;color:#555;font-size:0.75rem;padding:8px 0 0}
+/* History Panel */
+.history-btn{position:absolute;top:15px;right:15px;background:none;border:1px solid #333;border-radius:10px;color:#aaa;font-size:0.75rem;padding:5px 10px;cursor:pointer;z-index:5}
+.history-panel{position:fixed;top:0;right:-100%;width:100%;height:100%;background:#0a0a0a;z-index:2000;transition:right 0.3s ease;overflow-y:auto}
+.history-panel.open{right:0}
+.history-header{display:flex;justify-content:space-between;align-items:center;padding:18px 20px;border-bottom:1px solid #222}
+.history-header h2{color:#00e5ff;font-size:1.1rem;letter-spacing:1px}
+.history-clear{background:none;border:1px solid #333;color:#aaa;border-radius:8px;padding:5px 12px;cursor:pointer;font-size:0.8rem}
+.close-history{background:none;border:none;color:#aaa;font-size:1.5rem;cursor:pointer}
+.history-list{padding:10px}
+.history-item{padding:12px 15px;border-bottom:1px solid #1a1a1a;cursor:pointer}
+.history-item:hover{background:#111}
+.history-expr{color:#555;font-size:0.85rem;margin-bottom:3px}
+.history-result{color:#fff;font-size:1.2rem;font-weight:300}
+.history-empty{text-align:center;padding:60px 20px;color:#333;font-size:0.9rem}
+/* Toast */
+.toast{position:fixed;bottom:40px;left:50%;transform:translateX(-50%);background:#00bcd4;color:#000;padding:8px 20px;border-radius:20px;font-weight:700;font-size:0.85rem;display:none;z-index:9999;letter-spacing:0.5px}
+.toast.show{display:block;animation:fadeInOut 1.8s ease}
+@keyframes fadeInOut{0%{opacity:0;transform:translateX(-50%) translateY(10px)}15%{opacity:1;transform:translateX(-50%) translateY(0)}85%{opacity:1}100%{opacity:0}}
 </style>
 </head>
 <body>
 <div class="calculator" id="calc">
+  <button class="history-btn" onclick="openHistory()">History</button>
   <div class="display">
     <div class="swipe-hint">↑ swipe up for scientific</div>
     <div class="expression" id="expression"></div>
-    <div class="result" id="result">0</div>
+    <div class="result-row">
+      <div class="result" id="result">0</div>
+      <button class="copy-btn" onclick="copyResult()">Copy</button>
+    </div>
   </div>
   <div class="main-grid">
     <button class="btn-clear" id="acBtn" onclick="clearAll()">AC</button>
@@ -79,88 +104,89 @@ button:active{opacity:0.6}
     <div class="sci-close">↓ swipe down to close</div>
   </div>
 </div>
+
+<!-- History Panel -->
+<div class="history-panel" id="historyPanel">
+  <div class="history-header">
+    <h2>⏱ HISTORY</h2>
+    <div style="display:flex;gap:10px;align-items:center">
+      <button class="history-clear" onclick="clearHistory()">Clear</button>
+      <button class="close-history" onclick="closeHistory()">✕</button>
+    </div>
+  </div>
+  <div class="history-list" id="historyList"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
 <script>
 let expr='';
 let lastResult='';
 let justCalc=false;
 let sciOpen=false;
 let touchStartY=0;
+let history=JSON.parse(localStorage.getItem('calc_history')||'[]');
 
-function showAC(){document.getElementById('acBtn').textContent='AC'}
-function showC(){document.getElementById('acBtn').textContent='C'}
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.classList.remove('show');
+  void t.offsetWidth;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),1800);
+}
 
 function setDisplay(val){
   document.getElementById('result').textContent=val||'0';
 }
 
 function appendNum(n){
-  if(justCalc){
-    expr='';
-    justCalc=false;
-    document.getElementById('expression').textContent='';
-    showAC();
-  }
+  if(justCalc){expr='';justCalc=false;document.getElementById('expression').textContent='';}
   if(expr==='0')expr=n;
   else expr+=n;
   setDisplay(expr);
-  showC();
 }
 
 function appendDot(){
-  if(justCalc){expr='0';justCalc=false;showAC();}
+  if(justCalc){expr='0';justCalc=false;}
   const p=expr.split(/[\+\-\*\/]/);
   if(!p[p.length-1].includes('.'))expr+='.';
   setDisplay(expr);
-  showC();
 }
 
 function appendOp(op){
-  if(justCalc){
-    expr=lastResult;
-    justCalc=false;
-    document.getElementById('expression').textContent='';
-  }
-  if(expr===''&&op==='-'){expr='-';setDisplay(expr);showC();return;}
+  if(justCalc){expr=lastResult;justCalc=false;document.getElementById('expression').textContent='';}
+  if(expr===''&&op==='-'){expr='-';setDisplay(expr);return;}
   if(!expr)return;
   if(['+','-','*','/'].includes(expr.slice(-1)))expr=expr.slice(0,-1);
   expr+=op;
   setDisplay(expr);
-  showC();
 }
 
 function appendSci(fn){
-  if(justCalc){expr='';justCalc=false;showAC();}
-  expr+=fn;
-  setDisplay(expr);
-  showC();
-  closeSci();
+  if(justCalc){expr='';justCalc=false;}
+  expr+=fn;setDisplay(expr);closeSci();
 }
 
 function appendVal(val){
-  if(justCalc){expr='';justCalc=false;showAC();}
+  if(justCalc){expr='';justCalc=false;}
   if(val==='Math.PI')expr+=Math.PI;
   else if(val==='Math.E')expr+=Math.E;
   else if(val==='^')expr+='**';
   else expr+=val;
   setDisplay(expr);
-  showC();
 }
 
 function clearAll(){
   expr='';lastResult='';justCalc=false;
   document.getElementById('expression').textContent='';
   setDisplay('0');
-  showAC();
 }
 
 function deleteLast(){
-  if(justCalc){
-    expr='';lastResult='';justCalc=false;
-    setDisplay('0');showAC();return;
-  }
+  if(justCalc){expr='';lastResult='';justCalc=false;setDisplay('0');return;}
   expr=expr.slice(0,-1);
   setDisplay(expr||'0');
-  if(!expr)showAC();
 }
 
 function toggleSign(){
@@ -170,33 +196,80 @@ function toggleSign(){
 }
 
 function percentage(){
-  try{expr=String(parseFloat(eval(expr))/100);setDisplay(expr);}catch(e){}
+  try{
+    if(!expr)return;
+    expr=String(parseFloat(eval(expr))/100);
+    setDisplay(expr);
+  }catch(e){showToast('Invalid expression');}
 }
 
 function factorial(n){
   n=Math.floor(n);
-  if(n<0||n>170)return NaN;
+  if(n<0)return NaN;
+  if(n>170)return Infinity;
   if(n<=1)return 1;
   let r=1;for(let i=2;i<=n;i++)r*=i;return r;
 }
 
 function calculate(){
   if(!expr)return;
+  // Check divide by zero
+  if(/\/\s*0(?!\d)/.test(expr)){
+    document.getElementById('expression').textContent=expr+'=';
+    setDisplay('Cannot ÷ 0');
+    expr='';lastResult='';justCalc=false;
+    return;
+  }
   try{
     const d=expr.replace(/\*\*/g,'^').replace(/Math\.sqrt/g,'√').replace(/Math\.sin/g,'sin').replace(/Math\.cos/g,'cos').replace(/Math\.tan/g,'tan').replace(/Math\.log10/g,'log').replace(/Math\.log/g,'ln').replace(/Math\.PI/g,'π').replace(/Math\.E/g,'e');
     document.getElementById('expression').textContent=d+'=';
     const r=Function('"use strict";const factorial='+factorial.toString()+';return('+expr+')')();
+    if(!isFinite(r)){setDisplay('Infinity');expr='';lastResult='';justCalc=false;return;}
+    if(isNaN(r)){setDisplay('Invalid');expr='';lastResult='';justCalc=false;return;}
     lastResult=String(parseFloat(r.toFixed(10)));
+    // Save to history
+    history.unshift({expr:d,result:lastResult});
+    if(history.length>50)history.pop();
+    localStorage.setItem('calc_history',JSON.stringify(history));
     expr='';
     setDisplay(lastResult);
-    showAC();
     justCalc=true;
   }catch(e){
     setDisplay('Error');
     expr='';lastResult='';justCalc=false;
-    showAC();
   }
 }
+
+function copyResult(){
+  const val=document.getElementById('result').textContent;
+  if(val==='0'||val==='Error'||val==='Cannot ÷ 0'||val==='Invalid')return;
+  navigator.clipboard.writeText(val).then(()=>showToast('Copied!'));
+}
+
+function openHistory(){
+  const list=document.getElementById('historyList');
+  list.innerHTML='';
+  if(history.length===0){
+    list.innerHTML='<div class="history-empty">No calculations yet</div>';
+  }else{
+    history.forEach((h,i)=>{
+      const item=document.createElement('div');
+      item.className='history-item';
+      item.innerHTML=`<div class="history-expr">${h.expr}</div><div class="history-result">${h.result}</div>`;
+      item.onclick=()=>{
+        expr=h.result;lastResult=h.result;justCalc=true;
+        setDisplay(h.result);
+        document.getElementById('expression').textContent=h.expr+'=';
+        closeHistory();
+      };
+      list.appendChild(item);
+    });
+  }
+  document.getElementById('historyPanel').classList.add('open');
+}
+
+function closeHistory(){document.getElementById('historyPanel').classList.remove('open')}
+function clearHistory(){history=[];localStorage.setItem('calc_history','[]');openHistory();}
 
 function openSci(){sciOpen=true;document.getElementById('sciPanel').classList.add('open');}
 function closeSci(){sciOpen=false;document.getElementById('sciPanel').classList.remove('open');}
@@ -211,10 +284,15 @@ document.getElementById('calc').addEventListener('touchend',e=>{
 document.addEventListener('keydown',e=>{
   if(e.key>='0'&&e.key<='9')appendNum(e.key);
   else if(e.key==='.')appendDot();
-  else if(['+','-','*','/'].includes(e.key))appendOp(e.key);
+  else if(e.key==='+')appendOp('+');
+  else if(e.key==='-')appendOp('-');
+  else if(e.key==='*')appendOp('*');
+  else if(e.key==='/')appendOp('/');
   else if(e.key==='Enter'||e.key==='=')calculate();
   else if(e.key==='Backspace')deleteLast();
   else if(e.key==='Escape')clearAll();
+  else if(e.key==='c'||e.key==='C')copyResult();
+  else if(e.key==='h'||e.key==='H')openHistory();
 });
 </script>
 </body>
